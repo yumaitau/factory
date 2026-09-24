@@ -1,0 +1,43 @@
+{
+  "triggers": { "crons": ["* * * * *"] },
+  "vars": {
+    // Public origin of the main Factory app.
+    "FACTORY_URL": "https://factory.example.com",
+    // Must match the main app's NEXT_PUBLIC_LABEL_PREFIX.
+    "LABEL_PREFIX": "factory",
+    "COMMIT_AUTHOR_NAME": "Factory",
+    "COMMIT_AUTHOR_EMAIL": "factory@users.noreply.github.com",
+  },
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "factory-sandbox",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-09",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "rules": [{ "type": "Text", "globs": ["**/scripts/*.mjs"], "fallthrough": true }],
+  "containers": [
+    {
+      "class_name": "Sandbox",
+      "image": "./Dockerfile",
+      "instance_type": "standard-1",
+      "max_instances": 20,
+    },
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "Sandbox",
+        "name": "Sandbox",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "new_sqlite_classes": ["Sandbox"],
+      "tag": "v1",
+    },
+  ],
+  "r2_buckets": [
+    { "binding": "CODEX_VAULT", "bucket_name": "factory-codex-vault" },
+  ],
+}

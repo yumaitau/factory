@@ -1,0 +1,53 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "factory",
+  "main": "worker.ts",
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "queues": {
+    "producers": [{ "binding": "FACTORY_EVENTS", "queue": "factory-events" }],
+    "consumers": [{ "queue": "factory-events", "max_batch_size": 10, "max_batch_timeout": 1,
+      "max_concurrency": 1, "max_retries": 20, "retry_delay": 30, "dead_letter_queue": "factory-events-failed" }]
+  },
+  "secrets": { "required": ["SANDBOX_RUNNER_SECRET"] },
+  "compatibility_date": "2026-09-09",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "factory",
+    },
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "factory",
+      // Replace with the ID printed by `wrangler d1 create factory`.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "drizzle",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "ARTIFACTS",
+      "bucket_name": "factory-artifacts",
+    },
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "factory-cache",
+    },
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 },
+  },
+  "placement": { "mode": "smart" },
+  "limits": { "cpu_ms": 60000 },
+  "vars": {
+    // Google Workspace domains allowed to sign in.
+    "ALLOWED_EMAIL_DOMAINS": "example.com",
+  },
+}
