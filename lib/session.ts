@@ -6,8 +6,10 @@ import { redirect } from 'next/navigation';
 import { getAuth } from '@/lib/auth';
 
 export async function getSession() {
+  // Establish request-time rendering before Cloudflare auth initialization can yield.
+  const requestHeaders = await headers();
   const auth = await getAuth();
-  return auth.api.getSession({ headers: await headers() });
+  return auth.api.getSession({ headers: requestHeaders });
 }
 
 /**
